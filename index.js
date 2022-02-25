@@ -1,6 +1,6 @@
 const myCluster = require('cluster');
 const os = require('os');
-const expressServer = require('./app');
+const expressServer = require('./express_server');
 
 // We will check if current process is master
 if (myCluster.isMaster) {

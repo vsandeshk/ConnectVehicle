@@ -53,6 +53,10 @@ module.exports.handleMessage = function(message, sock) {
       obj.type = "data";
       obj.data = setVehicleStatus(message)
       obj.message = message;
+    } else if (message === "SURE, I WILL!") {
+      obj.type = "data";
+      obj.data = {message: message};
+      obj.message = message;
     } else {
       obj.type = "message";
       obj.message = response_messages.unknown_message;

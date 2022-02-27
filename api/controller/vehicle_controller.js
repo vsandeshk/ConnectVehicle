@@ -60,26 +60,27 @@ module.exports.vehicleInfo = async function(req, res) {
 
 };
 
-module.exports.setUpdateFrequency = function(req, res) {
+module.exports.setUpdateFrequency = async function(req, res) {
   /*
    * This function will request tcp web sockets to set the updates time interval of vehicle
    * We assume that the protocols are already developed, so to give response, we will use dummy message
    * We will take device_id from url parameter. we assume that this is also set as tcp socket id.
-   * first we will check if device connected. Then we will set the interval.
-   * we assume that the protocol is already developed and called in this function. so we will directly give response.
    */
 
   let device_id = req.params.device_id; // assuming that device id will be set as socket id.
   let interval = req.body.time_interval; //interval can be 10-3600
 
-  /* function to send req to tcp client */
-  console.log(device_id);
+  let obj = {};
+  obj.device_id = device_id;
+  obj.message = "KEEP ME POSTED EVERY "+interval+" SECONDS.";
+  //let success_obj = await subscribeUserChannel(device_id);
+  //publish code
+  await publishVehicleChannel(obj);
 
-  let success_message = "SURE, I WILL!";
-  let error_message = "VEHICLE IS NOT CONNECTED.";
+  let success_obj = await userChannel(device_id);
 
   res
     .status(200)
-    .json(success_message);
+    .json(success_obj);
 
 };

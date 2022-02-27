@@ -5,6 +5,7 @@ var ctrl = require('../controller/vehicle_controller.js');
 router
   .route('/vehicle/:device_id/info')
   .get(function(req, res) {
+    console.log("check");
     ctrl.vehicleInfo(req, res);
   });
 

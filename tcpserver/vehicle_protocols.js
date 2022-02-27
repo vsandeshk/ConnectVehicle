@@ -3,6 +3,7 @@ const socket = require('net');
 const login_regex = /^HELLO, I'M (.+)!$/;
 const frequency_regex = /^KEEP ME POSTED EVERY (0*[1-9][0-9]*) SECONDS.$/;
 const status_regex = /^REPORT. I'M HERE ([0-9]+(\.[0-9]+)?) ([0-9]+(\.[0-9]+)?), (RESTING|RUNNING) AND CHARGED AT ([0-9]+)%.$/;
+const status_regex2 = /^FINE. I'M HERE ([0-9]+(\.[0-9]+)?) ([0-9]+(\.[0-9]+)?), (RESTING|RUNNING) AND CHARGED AT ([0-9]+)%.$/;
 
 var device_id;
 
@@ -14,46 +15,55 @@ var device_id;
   unknown_device: "UNKNOWN DEVICE"
 }
 
-vehicle_status = {
-  latitude: 0,
-  longitude: 0,
-  state: "",
-  battery: 0
+setDeviceId = function(message, sock) {
+  const [, id] = message.match(login_regex);
+  sock.device_id = id;
 }
 
-setDeviceId = function(message) {
-  const [, id] = message.match(login_regex);
-  device_id = id;
+getDeviceId = function(message) {
+  return device_id;
 }
 
 setVehicleStatus = function(message) {
-  const [, latitude,, longitude,, state, battery] = message.match(status_regex);
+  var vehicle_status = {};
+  const [, latitude,, longitude,, state, battery] = message.match(status_regex2);
   vehicle_status.latitude = parseFloat(latitude);
   vehicle_status.longitude = parseFloat(longitude);
   vehicle_status.state = state;
   vehicle_status.battery = parseFloat(battery);
 
-  console.log(vehicle_status);
+  return vehicle_status;
+
 }
 
 module.exports.getDeviceId = function() {
   return device_id;
 }
 
-module.exports.handleMessage = function(message) {
-  if (device_id) {
+module.exports.handleMessage = function(message, sock) {
+  var obj = {type: "error", message: "Error Message!", data: {}};
+  if (sock.device_id) {
     if (message === "PING.") {
-      return response_messages.ping;
+      obj.type = "message";
+      obj.message = response_messages.ping;
     } else if (status_regex.test(message)) {
-      setVehicleStatus(message);
-      return response_messages.status;
+      obj.type = "message";
+      obj.message = response_messages.status;
+    } else if (status_regex2.test(message)) {
+      obj.type = "data";
+      obj.data = setVehicleStatus(message)
+      obj.message = message;
     } else {
-        return response_messages.unknown_message;
+      obj.type = "message";
+      obj.message = response_messages.unknown_message;
     }
   } else if (login_regex.test(message)) {
-    setDeviceId(message);
-    return response_messages.greet;
+    obj.type = "message";
+    obj.message = response_messages.greet;
+    setDeviceId(message, sock);
   } else {
-    return response_messages.unknown_device;
+    obj.type = "message";
+    obj.message = response_messages.unknown_device;
   }
+  return obj;
 }

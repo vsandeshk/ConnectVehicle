@@ -2,6 +2,10 @@ const myCluster = require('cluster');
 const os = require('os');
 const expressServer = require('./express_server');
 
+expressServer();
+
+/*
+
 // We will check if current process is master
 if (myCluster.isMaster) {
   // Get total num of CPUs
@@ -23,3 +27,4 @@ myCluster.on('exit', function (worker) {
   console.log(`Staring a new one...`);
   myCluster.fork();
 });
+*/

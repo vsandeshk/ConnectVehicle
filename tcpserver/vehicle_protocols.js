@@ -53,7 +53,7 @@ module.exports.handleMessage = function(message, sock) {
       obj.type = "data";
       obj.data = setVehicleStatus(message)
       obj.message = message;
-    } else if (message === "SURE, I WILL!") {
+    } else if (message === "SURE, I WILL!" || message === "DONE!" || message === "I CAN'T, SORRY.") {
       obj.type = "data";
       obj.data = {message: message};
       obj.message = message;

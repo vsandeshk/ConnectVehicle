@@ -84,3 +84,23 @@ module.exports.setUpdateFrequency = async function(req, res) {
     .json(success_obj);
 
 };
+
+module.exports.sendCommand = async function(req, res) {
+
+  let device_id = req.params.device_id; // assuming that device id will be set as socket id.
+  let command = req.params.command; //interval can be 10-3600
+
+  let obj = {};
+  obj.device_id = device_id;
+  obj.message = "HEY YOU, "+command+"!";
+  //let success_obj = await subscribeUserChannel(device_id);
+  //publish code
+  await publishVehicleChannel(obj);
+
+  let success_obj = await userChannel(device_id);
+
+  res
+    .status(200)
+    .json(success_obj);
+
+};

@@ -15,4 +15,10 @@ router
     ctrl.setUpdateFrequency(req, res);
   });
 
+router
+  .route('/vehicle/:device_id/:command')
+  .post(function(req, res) {
+    ctrl.sendCommand(req, res);
+  });
+
 module.exports = router;

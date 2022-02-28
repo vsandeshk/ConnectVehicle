@@ -1,11 +1,20 @@
 const socket = require('net');
 
+
+/*
+* These are the regular expressions to identifies some protocols
+* THese also use to fetch data from message
+*/
 const login_regex = /^HELLO, I'M (.+)!$/;
 const frequency_regex = /^KEEP ME POSTED EVERY (0*[1-9][0-9]*) SECONDS.$/;
 const status_regex = /^REPORT. I'M HERE ([0-9]+(\.[0-9]+)?) ([0-9]+(\.[0-9]+)?), (RESTING|RUNNING) AND CHARGED AT ([0-9]+)%.$/;
 const status_regex2 = /^FINE. I'M HERE ([0-9]+(\.[0-9]+)?) ([0-9]+(\.[0-9]+)?), (RESTING|RUNNING) AND CHARGED AT ([0-9]+)%.$/;
 
 var device_id;
+
+/*
+* This object contains the message that tcp server will send to vehicle on some specific commads.
+*/
 
  response_messages = {
   greet: "HI, NICE TO MEET YOU!",
@@ -15,15 +24,11 @@ var device_id;
   unknown_device: "UNKNOWN DEVICE"
 }
 
-setDeviceId = function(message, sock) {
-  const [, id] = message.match(login_regex);
-  sock.device_id = id;
-}
-
-getDeviceId = function(message) {
-  return device_id;
-}
-
+/*
+* This method is use to get the status parameters from the vehicle
+* the parameters will be fetched by using regex expressions
+* the fetch parameters will be set to a object that will be send to rest server
+*/
 setVehicleStatus = function(message) {
   var vehicle_status = {};
   const [, latitude,, longitude,, state, battery] = message.match(status_regex2);
@@ -36,10 +41,12 @@ setVehicleStatus = function(message) {
 
 }
 
-module.exports.getDeviceId = function() {
-  return device_id;
-}
 
+/*
+* This message is use to handle all the messages received by the vehicle
+* this also decides which message should send to rest server or which should just send to tcp to get response.
+* decision will be based on some procotols and comparision message with simple string or a regular expressoin.
+*/
 module.exports.handleMessage = function(message, sock) {
   var obj = {type: "error", message: "Error Message!", data: {}};
   if (sock.device_id) {

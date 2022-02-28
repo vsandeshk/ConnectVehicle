@@ -8,6 +8,7 @@ const redis_sub_instance = redis.createClient();
 redis_sub_instance.connect();
 
 
+//create tcp server
 const server = net.createServer();
 server.listen(port, host, () => {
     console.log('TCP Server is running on port ' + port +'.');
@@ -15,13 +16,15 @@ server.listen(port, host, () => {
 
 let sockets = [];
 
+//write on socket
 writeOnStream = function(sock, message) {
-  console.log("sock: ", message);
   sock.write(message+"\n");
 }
 
-
-
+/*
+* This method is to subscribe vehicle using its unique id.
+* This method will receive messages from rest server using redis pub/sub.
+*/
 subscribeVehicleChannel = async function(sock) {
   let channel_name =  redis_channels.getVehicleChannel(sock.device_id);
 
@@ -34,6 +37,10 @@ subscribeVehicleChannel = async function(sock) {
   });
 }
 
+/*
+* This method is to publish vehicle.
+* This method will send messages to rest server using redis pub/sub.
+*/
 publishUserChannel = async function(obj) {
   redis_instance = redis.createClient();
   await redis_instance.connect();
@@ -44,12 +51,19 @@ publishUserChannel = async function(obj) {
 
 }
 
+/*
+* this method is use to connect client to tcp server
+* this is use whenever a device will connect to tcp server
+*/
 server.on('connection', function(sock) {
     console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
     sockets.push(sock);
 
+    /*
+    * this sock.on() method is use to receive data from vehicle via socket
+    * this is use whenever a device will connect to tcp server
+    */
     sock.on('data', function(data) {
-        console.log('DATA ' + sock.remoteAddress + ': ' + data);
         let message = data.toString().trim();
         let response = protocols.handleMessage(message, sock);
         if (sock.device_id && !sock.subscribe_channel) {
